@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ForgePilot AI — CSV Cleanup Demo</title>
+<style>
+body{margin:0;background:#0c1424;color:#edf2fc;font:17px/1.55 system-ui,sans-serif}main{max-width:900px;margin:50px auto;padding:24px}small,.muted{color:#afbed5}h1{font-size:42px;line-height:1.15}textarea{box-sizing:border-box;width:100%;height:230px;background:#142139;color:#fff;border:1px solid #697b99;border-radius:12px;padding:16px;font:15px/1.5 monospace}button{background:#8bf0ca;color:#08251b;border:0;padding:12px 20px;border-radius:9px;font-weight:700;cursor:pointer;margin:12px 8px 12px 0}button:disabled{opacity:.45;cursor:default}#status{white-space:pre-wrap;background:#142139;padding:20px;border-radius:12px}.note{border-left:3px solid #8bf0ca;padding-left:18px}a{color:#8bf0ca}@media print{textarea,button{display:none}body{background:white;color:black}}
+</style>
+<main><small>FORGEPILOT AI / ONLINE AUTOMATION</small><h1>Turn messy exports into clean CSV files.</h1>
+<p>Preview a focused cleanup: trim spaces, remove exact duplicate rows, and flag blanks. Your identifiers remain text.</p>
+<p class="note">Service concept: <strong>$99 introductory cleanup</strong> for one agreed CSV, up to 5,000 rows and 20 columns. Scope is confirmed before any payment. This demo does not accept payments.</p>
+<label for="input">Paste CSV with a header row</label><textarea id="input" spellcheck="false" placeholder="customer_id,name,email"></textarea>
+<button id="sample" type="button">Load sample</button><button id="clean" type="button">Preview cleanup</button><button id="download" type="button" disabled>Download cleaned CSV</button>
+<p id="status" role="status">Ready. Use the sample to see a before-and-after example.</p>
+<p class="muted">Data is processed in this page. No uploads, network calls, or model requests. Changes to the input clear the previous result. Blank values are reported rather than guessed. Duplicate detection compares every field after trimming.</p>
+<p><a href="https://github.com/AiGOVERNOR/AiGOVERNOR/issues/new" target="_blank" rel="noopener noreferrer">Ask about an online project</a> — share column names and synthetic examples only in public inquiries.</p></main>
+<script>
+'use strict';
+const input=document.getElementById('input'),statusBox=document.getElementById('status'),download=document.getElementById('download');
+let cleaned=null;
+function invalidate(){cleaned=null;download.disabled=true;statusBox.textContent='Input changed. Preview cleanup to create a new result.';}
+input.addEventListener('input',invalidate);
+document.getElementById('sample').onclick=()=>{input.value='customer_id,name,email\n001, Alice ,alice@example.com\n002,Bob,bob@example.com\n001,Alice,alice@example.com\n003,Charlie,\n';invalidate();};
+function parseCSV(text){
+  if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+  if(text.length>2000000)throw Error('Demo limit: 2 million characters.');
+  if(!text.length)throw Error('Paste a CSV file first.');
+  const rows=[];let row=[],field='',quoted=false,closed=false,started=false;
+  const pushField=()=>{row.push(field);field='';closed=false;started=false;};
+  const pushRow=()=>{pushField();rows.push(row);row=[];};
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(quoted){if(c==='"'){if(text[i+1]==='"'){field+='"';i++;}else{quoted=false;closed=true;}}else field+=c;continue;}
+    if(c===','){pushField();continue;}
+    if(c==='\r'||c==='\n'){if(c==='\r'&&text[i+1]==='\n')i++;pushRow();continue;}
+    if(closed)throw Error('Unexpected text after a closing quote.');
+    if(c==='"'){if(started)throw Error('Quote inside an unquoted field.');quoted=true;started=true;}
+    else{field+=c;started=true;}
+  }
+  if(quoted)throw Error('Unclosed quoted field.');
+  if(started||closed||field.length||row.length)pushRow();
+  return rows;
+}
+function serialize(rows){return rows.map(row=>row.map(v=>/[",\r\n]/.test(v)?'"'+v.replaceAll('"','""')+'"':v).join(',')).join('\r\n')+'\r\n';}
+document.getElementById('clean').onclick=()=>{
+  cleaned=null;download.disabled=true;
+  try{
+    const rows=parseCSV(input.value);if(rows.length<2)throw Error('Include a header and at least one data row.');
+    const cols=rows[0].length;if(cols>20||rows.length-1>5000)throw Error('Demo limit: 5,000 data rows and 20 columns.');
+    if(rows.some(r=>r.length!==cols))throw Error('Rows have different column counts. Check your commas, quotes, and blank lines.');
+    const trimmed=rows.map(r=>r.map(v=>v.trim()));
+    if(trimmed[0].some(v=>!v))throw Error('Each column needs a nonblank header.');
+    if(new Set(trimmed[0]).size!==cols)throw Error('Duplicate column headers require manual review.');
+    const seen=new Set(),out=[trimmed[0]];let duplicates=0,blanks=0,formulaCells=0,changed=0;
+    rows.forEach((r,i)=>r.forEach((v,j)=>{if(v!==trimmed[i][j])changed++;}));
+    for(const row of trimmed.slice(1)){const key=JSON.stringify(row);if(seen.has(key)){duplicates++;continue;}seen.add(key);out.push(row);}
+    for(const row of out){for(const cell of row){if(/^[=+@-]/.test(cell))formulaCells++;}}
+    for(const row of out.slice(1))blanks+=row.filter(v=>v==='').length;
+    statusBox.textContent='Input data rows: '+(rows.length-1)+'\nOutput data rows: '+(out.length-1)+'\nExact duplicates removed: '+duplicates+'\nCells trimmed (including headers): '+changed+'\nBlank data cells remaining: '+blanks;
+    if(formulaCells){statusBox.textContent+='\nReview needed: '+formulaCells+' cells start with formula-like characters. Download is disabled in this demo; review these values before using a spreadsheet.';return;}
+    cleaned=serialize(out);download.disabled=false;
+  }catch(e){statusBox.textContent='Unable to clean: '+e.message;}
+};
+download.onclick=()=>{if(cleaned===null)return;const url=URL.createObjectURL(new Blob([cleaned],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='forgepilot-cleaned.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+</script></html>
