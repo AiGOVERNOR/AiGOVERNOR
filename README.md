@@ -1,32 +1,41 @@
 # AiGOVERNOR | ForgePilot AI
-### Practical automation for small businesses and trades.
+### Online spreadsheet cleanup and practical automation.
 
-Spend less time on paperwork and more time doing the work.
+I help online businesses and freelancers simplify repetitive CSV and reporting work. All services are delivered online.
 
-I'm building ForgePilot AI to simplify everyday business tasks with Python tools and AI assistance.
+## $99 introductory CSV cleanup
 
-## Have a repetitive task?
+One CSV file, up to **5,000 data rows and 20 columns**, with:
 
-I'm interested in custom projects involving:
+- Surrounding whitespace cleanup
+- Exact duplicate row removal using the agreed rules
+- Blank-cell reporting without guessing missing values
+- Identifiers and leading zeros preserved as text
+- A cleaned CSV and a short processing summary
+- One revision within the agreed scope
 
-- Quote and estimate calculators
-- Customer and sales tracking
-- Spreadsheet and report automation
-- File organization and data cleanup
-- AI assistants using Ollama
+Scope and delivery date are confirmed before payment. The target turnaround is two business days after receiving a usable file and agreeing the work. Larger jobs and custom automation are quoted separately.
 
-Tell me what you do manually, what tools you currently use, and what a successful result would look like. We can discuss the scope and price before starting.
+## Try the demo
 
-## What I'm building
+[Download the CSV cleanup demo](https://github.com/AiGOVERNOR/AiGOVERNOR/blob/main/demo.html) and open the saved HTML file in your browser. Click **Load sample**, then **Preview cleanup**. The demo processes pasted data in your browser without uploads or model requests. This repository provides the demo source; it is not a hosted web application.
 
-ForgePilot AI is under active development, bringing business tools, specialized AI agents, and human approval controls together in one dashboard.
+The sample produces 3 cleaned rows from 4 input rows, removing one exact duplicate and flagging one blank cell. The demo has passed 11 automated functional checks, including quoted fields, leading zeros, malformed input, row limits, and formula-like cell detection. It is a preview; every paid delivery is reviewed against the agreed requirements.
 
-## Why trades?
+## Request a project
 
-My background includes 15 years of structural welding. That experience shapes my focus: useful tools that solve practical problems.
+[Open a project inquiry](https://github.com/AiGOVERNOR/AiGOVERNOR/issues/new) with:
 
-## Work with me
+1. The repetitive task you want simplified
+2. Your column names and approximate row count
+3. Synthetic examples and the result you want
 
-Have a project idea? [Open a project inquiry](https://github.com/AiGOVERNOR/AiGOVERNOR/issues/new) in this profile repository.
+Public GitHub issues are visible to everyone. Do not post real customer records, passwords, API keys, financial records, or other confidential data. We will agree on a private delivery method before exchanging working files.
 
-Describe the task without posting passwords, customer records, or confidential business information.
+## Payments
+
+The pilot price is **$99 USD**. USDT, BTC, or XRP payment can be arranged privately after confirming the amount, asset, network, payment terms, and any required destination tag. Payment collection is not automated here; never share a seed phrase or private key.
+
+## About ForgePilot AI
+
+ForgePilot AI is under active development: Python tools, Ollama assistance, and workflows with human approval for consequential actions. Current focus: useful online services, clear scope, and verified results.
